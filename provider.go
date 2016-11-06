@@ -10,6 +10,7 @@ import (
 	cfg "github.com/jcmturner/aws-cli-wrapper/config"
 	"log"
 	"os/user"
+	//"container/list"
 )
 
 func Provider() terraform.ResourceProvider {
@@ -19,34 +20,40 @@ func Provider() terraform.ResourceProvider {
 	usr, _ := user.Current()
 	p.Schema["UserId"] = &schema.Schema{
 		Type:        schema.TypeString,
-		Optional:    false,
-		Default:     usr.Username,
+		Required:    true,
+		DefaultFunc: schema.EnvDefaultFunc("USERNAME", usr.Username),
 		Description: "Your username",
 	}
 	p.Schema["Password"] = &schema.Schema{
 		Type:        schema.TypeString,
 		Optional:    true,
-		Default:     "",
+		DefaultFunc: schema.EnvDefaultFunc("PASSWORD", ""),
 		Description: "Your password",
 	}
 	p.Schema["AuthEndPoint"] = &schema.Schema{
 		Type:        schema.TypeString,
-		Optional:    false,
-		Default:     "",
+		Required:    true,
+		DefaultFunc: schema.EnvDefaultFunc("AUTH_ENDPOINT", ""),
 		Description: "The URL of the federation authentication service",
 	}
 	p.Schema["TrustCA"] = &schema.Schema{
 		Type:        schema.TypeString,
-		Optional:    false,
-		Default:     "",
+		Required:    true,
+		DefaultFunc: schema.EnvDefaultFunc("TRUST_CA", ""),
 		Description: "The path to the signing CA certificate (PEM format) for the authentication service",
 	}
 	p.Schema["RoleId"] = &schema.Schema{
 		Type:        schema.TypeString,
-		Optional:    false,
-		Default:     "",
+		Required:    true,
+		DefaultFunc: schema.EnvDefaultFunc("ROLE_ID", ""),
 		Description: "The reference ID to the IAM role that will be assumed",
 	}
+	//p.Schema["parent_configure_func"] = &schema.Schema{
+	//	Type:        schema.TypeList,
+	//	Optional:    true,
+	//	Elem: p.ConfigureFunc,
+	//	Description: "The parent provider's configure function, 1st element in list.",
+	//}
 	// Replace the ConfigureFunc to talk to the auth service
 	p.ConfigureFunc = providerConfigure
 	return p
@@ -77,9 +84,12 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
+	//pConfigFunc := d.Get("parent_configure_func").(list.List)
+	//elem := pConfigFunc.Back()
+	//return elem.Value.(schema.ConfigureFunc)(d)
 
-	// The rest of this function is copied unchanged from https://github.com/hashicorp/terraform/blob/master/builtin/providers/aws/provider.go
-	// The function providerConfigure is not made public so it cannot be called directly
+	//The rest of this function is copied unchanged from https://github.com/hashicorp/terraform/blob/master/builtin/providers/aws/provider.go
+	//The function providerConfigure is not made public so it cannot be called directly
 	config := aws.Config{
 		AccessKey:               d.Get("access_key").(string),
 		SecretKey:               d.Get("secret_key").(string),

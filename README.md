@@ -1,4 +1,6 @@
-# Usage
+Please note this was a bit of experimentation but it didn't work as too many of the methods required in the native AWS terraform provider were not public.
+
+## Usage
 Use this just as you would the native AWS provider (https://www.terraform.io/docs/providers/aws/) but there are additional configuration values to wrap the native AWS provider with federated authentication:
 
 ```
