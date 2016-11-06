@@ -65,12 +65,27 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		return nil, err
 	}
 	log.Print("[INFO] Authentication to federation service successful")
+	err = d.Set("access_key", accessKey)
+	if err != nil {
+		return nil, err
+	}
+	err = d.Set("secret_key", secretKey)
+	if err != nil {
+		return nil, err
+	}
+	err = d.Set("token", sessionKey)
+	if err != nil {
+		return nil, err
+	}
+
+	// The rest of this function is copied unchanged from https://github.com/hashicorp/terraform/blob/master/builtin/providers/aws/provider.go
+	// The function providerConfigure is not made public so it cannot be called directly
 	config := aws.Config{
-		AccessKey:               accessKey,
-		SecretKey:               secretKey,
+		AccessKey:               d.Get("access_key").(string),
+		SecretKey:               d.Get("secret_key").(string),
 		Profile:                 d.Get("profile").(string),
 		CredsFilename:           d.Get("shared_credentials_file").(string),
-		Token:                   sessionKey,
+		Token:                   d.Get("token").(string),
 		Region:                  d.Get("region").(string),
 		MaxRetries:              d.Get("max_retries").(int),
 		DynamoDBEndpoint:        d.Get("dynamodb_endpoint").(string),
